@@ -229,11 +229,11 @@ def run(
             #     Sadle_actual_width = ((sw/Actual_distance)/focal_length)*1080
             #     Sadle_actual_height = ((sh/Actual_distance)/focal_length)*720 
 
-            #source video/webcam
-            #if (source == 0 | source == 1 | source == 2):
-                #imc = img_with_border
-            #else:
-                #imc = im0
+            # source video/webcam
+            # if (source == 0 | source == 1 | source == 2):
+            #     imc = img_with_border
+            # else:
+            #     imc = im0
 
             #Feedback Adi
             #Adding logo:
@@ -272,16 +272,18 @@ def run(
             # #Speed Warning:
             # cv2.putText(im0,'Speed Warning!!!',(700,300),cv2.FONT_HERSHEY_DUPLEX,0.5,(0,0,255),1)
             
-            if (int(source) == 0):
-                #Create a black background image of size 1000x1000
-                background = numpy.zeros((1500, 1500, 3), dtype=numpy.uint8)
+            #if (int(source) == 0):
+            #Create a black background image of size 1000x1000
+            background = numpy.zeros((1500, 1500, 3), dtype=numpy.uint8)
 
-                #Calculate the coordinates to paste the image onto the background      
-                x = (background.shape[1] - im0.shape[1]) // 2
-                y = (background.shape[0] - im0.shape[0]) // 2
+            #Calculate the coordinates to paste the image onto the background      
+            x = (background.shape[1] - im0.shape[1]) // 2
+            y = (background.shape[0] - im0.shape[0]) // 2
 
-                #Add black borders to the input image using cv2.copyMakeBorder()
-                img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+            #Add black borders to the input image using cv2.copyMakeBorder()
+            img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+
+            #Unable to save video
             
             # #Adding coordinates to the image
             if(lx != None):
@@ -295,6 +297,7 @@ def run(
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
                 # Actual width = (width in pixels/actual distance)/focal length
+            
 
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
