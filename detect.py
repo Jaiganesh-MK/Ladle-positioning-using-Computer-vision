@@ -138,15 +138,17 @@ def run(
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
-            lx = 0             # variable for Lx
-            sx = None             # variable for Sx
-            ly = 0             # variable for Ly
-            sy = None             # variable for Sy
-            lw = None             # variable for Lw
-            lh = None             # variable for Lh
-            sh = None             # variable for Sh
-            sw = None             # variable fot Sw
-            lx_speed = 0
+
+            lx = 0             # variable for Ladle x coordinate
+            sx = 0             # variable for Sadle x coordinate
+            ly = 0             # variable for Ladle y coordinate
+            sy = 0             # variable for Sadle y coordinate
+            lw = 0             # variable for Ladle width
+            lh = 0             # variable for Ladle height
+            sh = 0             # variable for Sadle height
+            sw = 0             # variable fot Sadle weight
+            # lx_speed = 0
+
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -248,8 +250,8 @@ def run(
             #img[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
             
             #horizontal & vertical gradient
-            h_l = int((h - 100)/2)
-            v_l = int((w - 50)/2)
+            h_l = int((h - 100)/2) #Horizontal scaling factor for drawing gradient line
+            v_l = int((w - 50)/2)  #Vertical scaling factor for drawing gradient line
         
             for j in range(0,h_l):
                 cv2.circle(im0,(j,2*v_l),2,(0,0+(j*255/h_l),255-(j*255/h_l)),10)
@@ -262,8 +264,9 @@ def run(
 
 
             #position indicators
-            cv2.circle(im0,(int(lx*1000),600),5,(255,255,255),-3)
-            cv2.circle(im0,(600,500),5,(255,255,255),-3)
+            cv2.circle(im0,(int(lx*h),v_l*2),5,(255,255,255),-3)
+            cv2.circle(im0,(h_l*2,int(ly*w)),5,(255,255,255),-3)
+
             #Other elements
             # cv2.putText(im0,'Crane Running', (700,500), cv2.FONT_HERSHEY_DUPLEX, 0.5,(255,255,255),1)
             # cv2.circle(im0, (690,495),10,(0,0,255),-1,)
