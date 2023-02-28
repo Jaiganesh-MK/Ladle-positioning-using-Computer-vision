@@ -136,6 +136,8 @@ def run(
         # Second-stage classifier (optional)
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
+        lx_speed = 0       # variable to store ladle x for speed estimation
+
         # Process predictions
         for i, det in enumerate(pred):  # per image
 
@@ -146,8 +148,7 @@ def run(
             lw = 0             # variable for Ladle width
             lh = 0             # variable for Ladle height
             sh = 0             # variable for Sadle height
-            sw = 0             # variable fot Sadle weight
-            # lx_speed = 0
+            sw = 0             # variable for Sadle weight
 
             seen += 1
             if webcam:  # batch_size >= 1
@@ -198,6 +199,7 @@ def run(
                         ly = xywh[1]
                         lw = xywh[2]
                         lh = xywh[3]
+
                     if c==1:
                         sx = xywh[0]
                         sy = xywh[1]
@@ -214,6 +216,11 @@ def run(
             h, w = 1280, 960
             im0 = cv2.resize(im0, (h,w), interpolation = cv2.INTER_LINEAR)
             
+            #Speed estimation
+            speed = (lx - lx_speed)*30
+            lx_speed = lx
+        
+
             # if(type(lw) == int & type(sw) == int):
             #     Actual_distance = 20
             #     focal_length = (0.15469*60)/16.6
@@ -278,12 +285,13 @@ def run(
             
             # #Adding coordinates to the image
             if(lx != None):
-                cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
+                # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
                 cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
                 cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (500, 50), fonts, 1, (WHITE), 2) #writing Ladle height
                 cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle height
                 cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (1000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
                 cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (1000, 100), fonts, 1, (WHITE), 2) #writing Sadle width
+                cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 2) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
                 # Actual width = (width in pixels/actual distance)/focal length
