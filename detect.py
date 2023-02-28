@@ -113,6 +113,8 @@ def run(
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
     vid_path, vid_writer = [None] * bs, [None] * bs
 
+    lx_speed = 0       # variable to store ladle x for speed estimation
+
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
@@ -135,8 +137,6 @@ def run(
 
         # Second-stage classifier (optional)
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
-
-        lx_speed = 0       # variable to store ladle x for speed estimation
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
