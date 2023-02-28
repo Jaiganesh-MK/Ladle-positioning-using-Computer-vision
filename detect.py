@@ -228,19 +228,6 @@ def run(
             #else:
                 #imc = im0
 
-            # #Adding coordinates to the image
-            # if(lx != None):
-            #     cv2.putText(im0, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
-            #     cv2.putText(im0, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
-                # cv2.putText(im0, f"Ladle height = {round(Ladle_actual_height,2)}", (500, 50), fonts, 1, (WHITE), 2) #writing Ladle height
-                # cv2.putText(im0, f"Sadle height = {round(Sadle_actual_height,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle height
-                # cv2.putText(im0, f"Ladle width = {round(Ladle_actual_width,2)}", (1000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
-                # cv2.putText(im0, f"Sadle width = {round(Ladle_actual_height,2)}", (1000, 100), fonts, 1, (WHITE), 2) #writing Sadle width
-                # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
-                # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
-                # Actual width = (width in pixels/actual distance)/focal length
-
-            
             #Feedback Adi
             #Adding logo:
             #logo = cv.imread('images.png')
@@ -288,6 +275,18 @@ def run(
 
                 #Add black borders to the input image using cv2.copyMakeBorder()
                 img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+            
+            # #Adding coordinates to the image
+            if(lx != None):
+                cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
+                cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
+                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (500, 50), fonts, 1, (WHITE), 2) #writing Ladle height
+                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle height
+                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (1000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
+                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (1000, 100), fonts, 1, (WHITE), 2) #writing Sadle width
+                # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
+                # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
+                # Actual width = (width in pixels/actual distance)/focal length
 
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
