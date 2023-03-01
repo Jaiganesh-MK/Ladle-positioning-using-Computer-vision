@@ -265,7 +265,7 @@ def run(
             y_diff = ((ly - sy)*w)
 
             #position indicators
-            cv2.circle(im0,(int(lx*(h_l/2.069695152)),v_l*2),5,(255,255,255),-3)
+            cv2.circle(im0,(int(lx*(h_l*2/2.069695152)),v_l*2),5,(255,255,255),-3)
             cv2.circle(im0,(h_l*2,int(ly*w)),5,(255,255,255),-3)
 
             #Other elements
