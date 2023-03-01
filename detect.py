@@ -261,12 +261,16 @@ def run(
 
 
             #Relative position
-            x_diff = ((lx - sx)*h)
-            y_diff = ((ly - sy)*w)
+            x_diff = ((lx - sx)*2*h_l)
+            y_diff = ((ly - sy)*2*v_l)
 
             #position indicators
-            cv2.circle(im0,(int(x_diff*(h_l*2/2.069695152)),v_l*2),5,(255,255,255),-3)
-            cv2.circle(im0,(h_l*2,int(y_diff*(v_l*2/2.069695152))),5,(255,255,255),-3)
+            cv2.circle(im0,(int(h_l+x_diff),v_l*2),10,(255,255,255),-3)
+            cv2.circle(im0,(h_l*2,int(y_diff+v_l)),10,(255,255,255),-3)
+
+            
+
+            
 
             #Other elements
             # cv2.putText(im0,'Crane Running', (700,500), cv2.FONT_HERSHEY_DUPLEX, 0.5,(255,255,255),1)
@@ -289,6 +293,8 @@ def run(
 
             #Add black borders to the input image using cv2.copyMakeBorder()
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+
+
 
             #Unable to save video in ubuntu
 
