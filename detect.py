@@ -213,7 +213,7 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            h, w = 640, 640
+            h, w = 1080, 640
             im0 = cv2.resize(im0, (h,w), interpolation = cv2.INTER_LINEAR)
             
             #Speed estimation
@@ -274,7 +274,7 @@ def run(
             
             #if (int(source) == 0):
             #Create a black background image of size 1000x1000
-            background = numpy.zeros((1000, 1000, 3), dtype=numpy.uint8)
+            background = numpy.zeros((1000, 1500, 3), dtype=numpy.uint8)
 
             #Calculate the coordinates to paste the image onto the background      
             x = (background.shape[1] - im0.shape[1]) // 2
@@ -289,10 +289,10 @@ def run(
             if(lx != None):
                 # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
                 cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
-                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (500, 50), fonts, 1, (WHITE), 2) #writing Ladle height
-                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle height
-                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (1000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
-                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (1000, 100), fonts, 1, (WHITE), 2) #writing Sadle width
+                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (250, 50), fonts, 1, (WHITE), 2) #writing Ladle height
+                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (250, 100), fonts, 1, (WHITE), 2) #writing Sadle height
+                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (450, 50), fonts, 1, (WHITE), 2) #writing Ladle width
+                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (450, 100), fonts, 1, (WHITE), 2) #writing Sadle width
                 cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 2) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
