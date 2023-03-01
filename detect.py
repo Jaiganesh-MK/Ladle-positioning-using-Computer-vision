@@ -213,7 +213,7 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            h, w = 1280, 960
+            h, w = 640, 640
             im0 = cv2.resize(im0, (h,w), interpolation = cv2.INTER_LINEAR)
             
             #Speed estimation
@@ -274,7 +274,7 @@ def run(
             
             #if (int(source) == 0):
             #Create a black background image of size 1000x1000
-            background = numpy.zeros((1500, 1500, 3), dtype=numpy.uint8)
+            background = numpy.zeros((1000, 1000, 3), dtype=numpy.uint8)
 
             #Calculate the coordinates to paste the image onto the background      
             x = (background.shape[1] - im0.shape[1]) // 2
