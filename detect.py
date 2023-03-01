@@ -224,7 +224,8 @@ def run(
             #Actual distance calculation
             # if(type(lw) == int & type(sw) == int):
             Actual_distance = 132.08
-            focal_length = (0.15469*60)/16.6
+            focal_length = (0.14062*132.08*h)/16.9
+            
             
             #     Ladle_actual_width = ((lw/Actual_distance)/focal_length)*1080
             #     Ladle_actual_height = ((lh/Actual_distance)/focal_length)*640
@@ -259,8 +260,12 @@ def run(
                 cv2.circle(im0,(h_l*2,v_l+k),2,(0,255-(k*255/v_l),0+(k*255/v_l)),10)
 
 
+            #Relative position
+            x_diff = ((lx - sx)*h)
+            y_diff = ((ly - sy)*w)
+
             #position indicators
-            cv2.circle(im0,(int(lx*h),v_l*2),5,(255,255,255),-3)
+            cv2.circle(im0,(int(lx*(h_l/2.069695152)),v_l*2),5,(255,255,255),-3)
             cv2.circle(im0,(h_l*2,int(ly*w)),5,(255,255,255),-3)
 
             #Other elements
@@ -285,11 +290,7 @@ def run(
             #Add black borders to the input image using cv2.copyMakeBorder()
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
-            #Unable to save video
-
-            #Relative position
-            x_diff = ((lx - sx)*h)/(Actual_distance*focal_length)
-            y_diff = ((ly - sy)*w)/(Actual_distance*focal_length)
+            #Unable to save video in ubuntu
 
             cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 2) #Offest from ideal position (x_off,y_off)
             
@@ -297,10 +298,10 @@ def run(
             if(lx != None):
                 # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
                 cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
-                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (250, 50), fonts, 1, (WHITE), 2) #writing Ladle height
-                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (250, 100), fonts, 1, (WHITE), 2) #writing Sadle height
-                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (450, 50), fonts, 1, (WHITE), 2) #writing Ladle width
-                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (450, 100), fonts, 1, (WHITE), 2) #writing Sadle width
+                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (300, 50), fonts, 1, (WHITE), 2) #writing Ladle height
+                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (300, 100), fonts, 1, (WHITE), 2) #writing Sadle height
+                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (5000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
+                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle width
                 cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 2) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
