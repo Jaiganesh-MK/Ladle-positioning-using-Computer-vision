@@ -271,13 +271,7 @@ def run(
             #distance estimation
             actual_width = 16.9
 
-            if(lw !=0):
-                d_from_camera = focal_length*actual_width/(lw*h)
-                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (700, 100), fonts, 1, (WHITE), 2)
-
-
-
-            
+                      
 
             #Other elements
             # cv2.putText(im0,'Crane Running', (700,500), cv2.FONT_HERSHEY_DUPLEX, 0.5,(255,255,255),1)
@@ -301,7 +295,9 @@ def run(
             #Add black borders to the input image using cv2.copyMakeBorder()
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
-            
+            if(lw !=0):
+                d_from_camera = focal_length*actual_width/(lw*h)
+                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (700, 100), fonts, 1, (WHITE), 2)
 
             #Unable to save video in ubuntu
 
