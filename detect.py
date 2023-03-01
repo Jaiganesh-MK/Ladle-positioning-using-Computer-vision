@@ -221,13 +221,15 @@ def run(
             lx_speed = lx
         
 
+            #Actual distance calculation
             # if(type(lw) == int & type(sw) == int):
-            #     Actual_distance = 20
-            #     focal_length = (0.15469*60)/16.6
+            Actual_distance = 132.08
+            focal_length = (0.15469*60)/16.6
+            
             #     Ladle_actual_width = ((lw/Actual_distance)/focal_length)*1080
-            #     Ladle_actual_height = ((lh/Actual_distance)/focal_length)*720
+            #     Ladle_actual_height = ((lh/Actual_distance)/focal_length)*640
             #     Sadle_actual_width = ((sw/Actual_distance)/focal_length)*1080
-            #     Sadle_actual_height = ((sh/Actual_distance)/focal_length)*720 
+            #     Sadle_actual_height = ((sh/Actual_distance)/focal_length)*640 
 
             # source video/webcam
             # if (source == 0 | source == 1 | source == 2):
@@ -284,6 +286,12 @@ def run(
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
             #Unable to save video
+
+            #Relative position
+            x_diff = ((lx - sx)*h)/(Actual_distance*focal_length)
+            y_diff = ((ly - sy)*w)/(Actual_distance*focal_length)
+
+            cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 2) #Offest from ideal position (x_off,y_off)
             
             # #Adding coordinates to the image
             if(lx != None):
