@@ -262,7 +262,7 @@ def run(
 
             #position indicators
             cv2.circle(im0,(int(h_l+x_diff),v_l*2),10,(255,255,255),-3)
-            cv2.circle(im0,(h_l*2,int(y_diff+v_l)),10,(255,255,255),-3)
+            cv2.circle(im0,(h_l*2,int(y_diff+v_l+(0.1165576923*w))),10,(255,255,255),-3)
 
             #Tolerance Band:
             cv2.rectangle(im0,(2*h_l-10,v_l-25),(2*h_l+10,v_l+25),(0,255,255),2)
@@ -296,7 +296,7 @@ def run(
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
             if(lw !=0):
-                d_from_camera = focal_length*actual_width/(lw*h)
+                d_from_camera = focal_length*actual_width/(lw*h) - 130
                 cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (700, 100), fonts, 1, (WHITE), 2)
 
             #Unable to save video in ubuntu
