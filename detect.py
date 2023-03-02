@@ -73,7 +73,7 @@ def run(
         project=ROOT / 'runs/detect',  # save results to project/name
         name='exp',  # save results to project/name
         exist_ok=False,  # existing project/name ok, do not increment
-        line_thickness=3,  # bounding box thickness (pixels)
+        line_thickness=1,  # bounding box thickness (pixels)
         hide_labels=False,  # hide labels
         hide_conf=True,  # hide confidences
         half=False,  # use FP16 half-precision inference
@@ -188,7 +188,7 @@ def run(
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-                        annotator.box_label(xyxy, label, color=colors(c, True))
+                        annotator.box_label(xyxy, label, color=colors(0, True))
                         
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
@@ -301,16 +301,23 @@ def run(
 
             #Unable to save video in ubuntu
 
-            cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 150), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
+            # cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 150), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
+            if(x_diff>0):
+                cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
+                cv2.arrowedLine(img_with_border, (500,150),(600,150), (255,255,255), 3, 8, 0, 0.1)
+            if(x_diff<0):
+                cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
+                cv2.arrowedLine(img_with_border, (600,150),(500,150), (255,255,255), 3, 8, 0, 0.1)
+
             
             # #Adding coordinates to the image
             if(lx != None):
                 # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
-                cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 1) #writing Sadle x,y
-                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (400, 50), fonts, 1, (WHITE), 1) #writing Ladle height
-                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (400, 100), fonts, 1, (WHITE), 1) #writing Sadle height
-                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (700, 50), fonts, 1, (WHITE), 1) #writing Ladle width
-                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (700, 100), fonts, 1, (WHITE), 1) #writing Sadle width
+                #cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 1) #writing Sadle x,y
+                #cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (400, 50), fonts, 1, (WHITE), 1) #writing Ladle height
+                #cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (400, 100), fonts, 1, (WHITE), 1) #writing Sadle height
+                #cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (700, 50), fonts, 1, (WHITE), 1) #writing Ladle width
+                #cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (700, 100), fonts, 1, (WHITE), 1) #writing Sadle width
                 cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 1) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
