@@ -75,7 +75,7 @@ def run(
         exist_ok=False,  # existing project/name ok, do not increment
         line_thickness=3,  # bounding box thickness (pixels)
         hide_labels=False,  # hide labels
-        hide_conf=False,  # hide confidences
+        hide_conf=True,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
@@ -297,36 +297,36 @@ def run(
 
             if(lw !=0):
                 d_from_camera = focal_length*actual_width/(lw*h) - 130
-                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (700, 100), fonts, 1, (WHITE), 2)
+                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (450, 150), fonts, 1, (WHITE), 1)
 
             #Unable to save video in ubuntu
 
-            cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
+            cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 150), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
             
             # #Adding coordinates to the image
             if(lx != None):
                 # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
                 cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 1) #writing Sadle x,y
-                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (300, 50), fonts, 1, (WHITE), 1) #writing Ladle height
-                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (300, 100), fonts, 1, (WHITE), 1) #writing Sadle height
-                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (5000, 50), fonts, 1, (WHITE), 1) #writing Ladle width
-                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (500, 100), fonts, 1, (WHITE), 1) #writing Sadle width
+                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (400, 50), fonts, 1, (WHITE), 1) #writing Ladle height
+                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (400, 100), fonts, 1, (WHITE), 1) #writing Sadle height
+                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (700, 50), fonts, 1, (WHITE), 1) #writing Ladle width
+                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (700, 100), fonts, 1, (WHITE), 1) #writing Sadle width
                 cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 1) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
                 # Actual width = (width in pixels/actual distance)/focal length
             
             #Crane Running Status
-            if speed >=1:
-                cv2.putText(img_with_border,' Crane Moving',(550,550),fonts, 1, WHITE, 1)
-                cv2.circle(img_with_border, (550,545),10,(0,0,255),-3)
+            if speed >=0.02:
+                cv2.putText(img_with_border,' Moving',(1300,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (1300,545),10,(0,0,255),-3)
             else:
-                cv2.putText(img_with_border,' Crane Stationary',(550,550),fonts, 1, WHITE, 1)
-                cv2.circle(img_with_border, (550,545),10,(0,255,0),-3)
+                cv2.putText(img_with_border,' Stationary',(1300,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (1300,545),10,(0,255,0),-3)
 
             #Logo Addition:
             logo = cv2.imread('images.png')
-            x_off = 765
+            x_off = 1400
             y_off = 0
             logo_resize = cv2.resize(logo, (100,100))
             img_with_border[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
@@ -397,7 +397,7 @@ def parse_opt():
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
     parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
-    parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
+    parser.add_argument('--hide-conf', default=True, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
     parser.add_argument('--vid-stride', type=int, default=1, help='video frame-rate stride')
