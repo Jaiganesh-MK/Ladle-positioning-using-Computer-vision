@@ -56,7 +56,7 @@ def run(
         source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.25,  # confidence threshold
+        conf_thres=0.7,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
         device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -75,7 +75,7 @@ def run(
         exist_ok=False,  # existing project/name ok, do not increment
         line_thickness=1,  # bounding box thickness (pixels)
         hide_labels=False,  # hide labels
-        hide_conf=True,  # hide confidences
+        hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
         vid_stride=1,  # video frame-rate stride
@@ -188,7 +188,7 @@ def run(
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-                        annotator.box_label(xyxy, label, color=colors(0, True))
+                        annotator.box_label(xyxy, label, color=colors(c, True))
                         
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
@@ -247,31 +247,29 @@ def run(
             v_l = int((w - 50)/2)  #Vertical scaling factor for drawing gradient line
         
             for j in range(0,h_l):
-                cv2.circle(im0,(j,2*v_l),2,(0,0+(j*255/h_l),255-(j*255/h_l)),10)
-                cv2.circle(im0,(h_l+j,v_l*2),2,(0,255-(j*255/h_l),0+(j*255/h_l)),10)
+                cv2.circle(im0,(j,2*v_l),10,(0,0+(j*255/h_l),255-(j*255/h_l)),10)
+                cv2.circle(im0,(h_l+j,v_l*2),10,(0,255-(j*255/h_l),0+(j*255/h_l)),10)
                 
 
             for k in range(0,v_l):
-                cv2.circle(im0,(h_l*2,k),2,(0,0+(k*255/v_l),255-(k*255/v_l)),10)
-                cv2.circle(im0,(h_l*2,v_l+k),2,(0,255-(k*255/v_l),0+(k*255/v_l)),10)
-
-
-            #Relative position
-            x_diff = ((lx - sx)*2*h_l)
-            y_diff = ((ly - sy)*2*v_l)
-
-            #position indicators
-            cv2.circle(im0,(int(h_l+x_diff),v_l*2),10,(255,255,255),-3)
-            cv2.circle(im0,(h_l*2,int(y_diff+v_l+(0.1165576923*w))),10,(255,255,255),-3)
+                cv2.circle(im0,(h_l*2,k),10,(0,0+(k*255/v_l),255-(k*255/v_l)),10)
+                cv2.circle(im0,(h_l*2,v_l+k),10,(0,255-(k*255/v_l),0+(k*255/v_l)),10)
 
             #Tolerance Band:
-            cv2.rectangle(im0,(2*h_l-10,v_l-25),(2*h_l+10,v_l+25),(0,255,255),2)
-            cv2.rectangle(im0,(h_l-int(h_l*0.07488),2*v_l-10),(h_l+int(h_l*0.07488),2*v_l+10),(0,255,255),3)
+            cv2.rectangle(im0,(2*h_l-20,v_l-40),(2*h_l+20,v_l+40),(0,255,255),2)
+            cv2.rectangle(im0,(h_l-int(h*0.07488),2*v_l-20),(h_l+int(h*0.07488),2*v_l+20),(0,255,255),2)
+            
+            #Relative position
+            x_diff = ((lx - sx)*2*h_l)*6
+            y_diff = ((ly - sy)*2*v_l)*6
+        
+            
+            #position indicators
+            cv2.circle(im0,(int(h_l+x_diff-70),v_l*2),10,(255,255,255),-3)
+            cv2.circle(im0,(h_l*2, int(y_diff+v_l+(0.1165576923*w))),10,(255,255,255),-3)
 
             #distance estimation
             actual_width = 16.9
-
-                      
 
             #Other elements
             # cv2.putText(im0,'Crane Running', (700,500), cv2.FONT_HERSHEY_DUPLEX, 0.5,(255,255,255),1)
@@ -297,18 +295,24 @@ def run(
 
             if(lw !=0):
                 d_from_camera = focal_length*actual_width/(lw*h) - 130
-                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (450, 150), fonts, 1, (WHITE), 1)
+                #cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (450, 150), fonts, 1, (WHITE), 1)
+                cv2.circle(im0,(h_l*2,v_l+int(d_from_camera)),30,(255,255,255),-3)
+                if(x_diff>0):
+                    cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (100,150),(300,150), (255,255,255), 3, 8, 0, 0.1)
+                if(x_diff<0):
+                    cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (300,150),(100,150), (255,255,255), 3, 8, 0, 0.1)
+                if(d_from_camera>0):
+                    cv2.putText(img_with_border, f"Fw= {round(d_from_camera,2)}",(50,50), fonts, 1, (WHITE), 1)
+                if(d_from_camera<0):
+                    cv2.putText(img_with_border,f"Bw={round(d_from_camera,2)}",(50,50), fonts, 1, (WHITE), 1)
 
+
+            
             #Unable to save video in ubuntu
 
             # cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 150), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
-            if(x_diff>0):
-                cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
-                cv2.arrowedLine(img_with_border, (500,150),(600,150), (255,255,255), 3, 8, 0, 0.1)
-            if(x_diff<0):
-                cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
-                cv2.arrowedLine(img_with_border, (600,150),(500,150), (255,255,255), 3, 8, 0, 0.1)
-
             
             # #Adding coordinates to the image
             if(lx != None):
@@ -342,7 +346,7 @@ def run(
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
-                    cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
+                    cv2.namedWindow(str(p), cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                 cv2.imshow(str(p), img_with_border)
                 cv2.waitKey(1)  # 1 millisecond
@@ -385,7 +389,7 @@ def parse_opt():
     parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob/screen/0(webcam)')
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='(optional) dataset.yaml path')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
-    parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
+    parser.add_argument('--conf-thres', type=float, default=0.7, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
     parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
