@@ -98,7 +98,7 @@ def run(
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
-    fonts = cv2.FONT_HERSHEY_COMPLEX #defined by me
+    fonts = cv2.FONT_HERSHEY_COMPLEX_SMALL #defined by me
     WHITE = (255, 255, 255) #Font RGB coordinates
 
     # Dataloader
@@ -112,6 +112,8 @@ def run(
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
     vid_path, vid_writer = [None] * bs, [None] * bs
+
+    lx_speed = 0       # variable to store ladle x for speed estimation
 
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
@@ -138,15 +140,16 @@ def run(
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
-            lx = 0             # variable for Lx
-            sx = None             # variable for Sx
-            ly = 0             # variable for Ly
-            sy = None             # variable for Sy
-            lw = None             # variable for Lw
-            lh = None             # variable for Lh
-            sh = None             # variable for Sh
-            sw = None             # variable fot Sw
-            lx_speed = 0
+
+            lx = 0             # variable for Ladle x coordinate
+            sx = 0             # variable for Sadle x coordinate
+            ly = 0             # variable for Ladle y coordinate
+            sy = 0             # variable for Sadle y coordinate
+            lw = 0             # variable for Ladle width
+            lh = 0             # variable for Ladle height
+            sh = 0             # variable for Sadle height
+            sw = 0             # variable for Sadle weight
+
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -160,6 +163,7 @@ def run(
             s += '%gx%g ' % im.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
+            imnone = im0.copy() #Without algorithm video
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
                 # Rescale boxes from img_size to im0 size
@@ -196,6 +200,7 @@ def run(
                         ly = xywh[1]
                         lw = xywh[2]
                         lh = xywh[3]
+
                     if c==1:
                         sx = xywh[0]
                         sy = xywh[1]
@@ -209,47 +214,37 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            h, w = 1280, 960
+            h, w = 1080, 640
             im0 = cv2.resize(im0, (h,w), interpolation = cv2.INTER_LINEAR)
             
+            #Speed estimation
+            speed = (lx - lx_speed)*30
+            lx_speed = lx
+        
+
+            #Actual distance calculation
             # if(type(lw) == int & type(sw) == int):
-            #     Actual_distance = 20
-            #     focal_length = (0.15469*60)/16.6
-            #     Ladle_actual_width = ((lw/Actual_distance)/focal_length)*1080
-            #     Ladle_actual_height = ((lh/Actual_distance)/focal_length)*720
-            #     Sadle_actual_width = ((sw/Actual_distance)/focal_length)*1080
-            #     Sadle_actual_height = ((sh/Actual_distance)/focal_length)*720 
-
-            #source video/webcam
-            #if (source == 0 | source == 1 | source == 2):
-                #imc = img_with_border
-            #else:
-                #imc = im0
-
-            # #Adding coordinates to the image
-            # if(lx != None):
-            #     cv2.putText(im0, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
-            #     cv2.putText(im0, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 2) #writing Sadle x,y
-                # cv2.putText(im0, f"Ladle height = {round(Ladle_actual_height,2)}", (500, 50), fonts, 1, (WHITE), 2) #writing Ladle height
-                # cv2.putText(im0, f"Sadle height = {round(Sadle_actual_height,2)}", (500, 100), fonts, 1, (WHITE), 2) #writing Sadle height
-                # cv2.putText(im0, f"Ladle width = {round(Ladle_actual_width,2)}", (1000, 50), fonts, 1, (WHITE), 2) #writing Ladle width
-                # cv2.putText(im0, f"Sadle width = {round(Ladle_actual_height,2)}", (1000, 100), fonts, 1, (WHITE), 2) #writing Sadle width
-                # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
-                # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
-                # Actual width = (width in pixels/actual distance)/focal length
-
+            Actual_distance = 132.08
+            focal_length = (0.14062*132.08*h)/16.9
             
+            
+            #     Ladle_actual_width = ((lw/Actual_distance)/focal_length)*1080
+            #     Ladle_actual_height = ((lh/Actual_distance)/focal_length)*640
+            #     Sadle_actual_width = ((sw/Actual_distance)/focal_length)*1080
+            #     Sadle_actual_height = ((sh/Actual_distance)/focal_length)*640 
+
+            # source video/webcam
+            # if (source == 0 | source == 1 | source == 2):
+            #     imc = img_with_border
+            # else:
+            #     imc = im0
+
             #Feedback Adi
             #Adding logo:
-            #logo = cv.imread('images.png')
-            x_off = 765
-            y_off = 0
-            #logo_resize = cv.resize(logo, (100,100))
-            #img[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
-            
+                        
             #horizontal & vertical gradient
-            h_l = int((h - 100)/2)
-            v_l = int((w - 50)/2)
+            h_l = int((h - 100)/2) #Horizontal scaling factor for drawing gradient line
+            v_l = int((w - 50)/2)  #Vertical scaling factor for drawing gradient line
         
             for j in range(0,h_l):
                 cv2.circle(im0,(j,2*v_l),2,(0,0+(j*255/h_l),255-(j*255/h_l)),10)
@@ -261,9 +256,23 @@ def run(
                 cv2.circle(im0,(h_l*2,v_l+k),2,(0,255-(k*255/v_l),0+(k*255/v_l)),10)
 
 
+            #Relative position
+            x_diff = ((lx - sx)*2*h_l)
+            y_diff = ((ly - sy)*2*v_l)
+
             #position indicators
-            cv2.circle(im0,(int(lx*1000),600),5,(255,255,255),-3)
-            cv2.circle(im0,(600,500),5,(255,255,255),-3)
+            cv2.circle(im0,(int(h_l+x_diff),v_l*2),10,(255,255,255),-3)
+            cv2.circle(im0,(h_l*2,int(y_diff+v_l+(0.1165576923*w))),10,(255,255,255),-3)
+
+            #Tolerance Band:
+            cv2.rectangle(im0,(2*h_l-10,v_l-25),(2*h_l+10,v_l+25),(0,255,255),2)
+            cv2.rectangle(im0,(h_l-int(h_l*0.07488),2*v_l-10),(h_l+int(h_l*0.07488),2*v_l+10),(0,255,255),3)
+
+            #distance estimation
+            actual_width = 16.9
+
+                      
+
             #Other elements
             # cv2.putText(im0,'Crane Running', (700,500), cv2.FONT_HERSHEY_DUPLEX, 0.5,(255,255,255),1)
             # cv2.circle(im0, (690,495),10,(0,0,255),-1,)
@@ -275,17 +284,54 @@ def run(
             # #Speed Warning:
             # cv2.putText(im0,'Speed Warning!!!',(700,300),cv2.FONT_HERSHEY_DUPLEX,0.5,(0,0,255),1)
             
-            if (int(source) == 0):
-                #Create a black background image of size 1000x1000
-                background = numpy.zeros((1500, 1500, 3), dtype=numpy.uint8)
+            #if (int(source) == 0):
+            #Create a black background image of size 1000x1000
+            background = numpy.zeros((1000, 1500, 3), dtype=numpy.uint8)
 
-                #Calculate the coordinates to paste the image onto the background      
-                x = (background.shape[1] - im0.shape[1]) // 2
-                y = (background.shape[0] - im0.shape[0]) // 2
+            #Calculate the coordinates to paste the image onto the background      
+            x = (background.shape[1] - im0.shape[1]) // 2
+            y = (background.shape[0] - im0.shape[0]) // 2
 
-                #Add black borders to the input image using cv2.copyMakeBorder()
-                img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+            #Add black borders to the input image using cv2.copyMakeBorder()
+            img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
+            if(lw !=0):
+                d_from_camera = focal_length*actual_width/(lw*h) - 130
+                cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (700, 100), fonts, 1, (WHITE), 2)
+
+            #Unable to save video in ubuntu
+
+            cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
+            
+            # #Adding coordinates to the image
+            if(lx != None):
+                # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
+                cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 1) #writing Sadle x,y
+                cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (300, 50), fonts, 1, (WHITE), 1) #writing Ladle height
+                cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (300, 100), fonts, 1, (WHITE), 1) #writing Sadle height
+                cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (5000, 50), fonts, 1, (WHITE), 1) #writing Ladle width
+                cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (500, 100), fonts, 1, (WHITE), 1) #writing Sadle width
+                cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 1) #writing speed estimation
+                # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
+                # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
+                # Actual width = (width in pixels/actual distance)/focal length
+            
+            #Crane Running Status
+            if speed >=1:
+                cv2.putText(img_with_border,' Crane Moving',(550,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (550,545),10,(0,0,255),-3)
+            else:
+                cv2.putText(img_with_border,' Crane Stationary',(550,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (550,545),10,(0,255,0),-3)
+
+            #Logo Addition:
+            logo = cv2.imread('images.png')
+            x_off = 765
+            y_off = 0
+            logo_resize = cv2.resize(logo, (100,100))
+            img_with_border[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
+
+            #
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
