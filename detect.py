@@ -261,7 +261,7 @@ def run(
             
             #Relative position
             x_diff = ((lx - sx)*2*h_l)*6
-            y_diff = ((ly - sy)*2*v_l)*6
+            y_diff = ((ly - sy)*2*v_l)
         
             
             #position indicators
@@ -299,14 +299,20 @@ def run(
                 cv2.circle(im0,(h_l*2,v_l+int(d_from_camera)),30,(255,255,255),-3)
                 if(x_diff>0):
                     cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
-                    cv2.arrowedLine(img_with_border, (100,150),(300,150), (255,255,255), 3, 8, 0, 0.1)
+                    cv2.arrowedLine(img_with_border, (150,150),(200,150), (255,255,255), 3, 8, 0, 0.1)
                 if(x_diff<0):
                     cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
                     cv2.arrowedLine(img_with_border, (300,150),(100,150), (255,255,255), 3, 8, 0, 0.1)
                 if(d_from_camera>0):
-                    cv2.putText(img_with_border, f"Fw= {round(d_from_camera,2)}",(50,50), fonts, 1, (WHITE), 1)
+                    cv2.putText(img_with_border, f"Fw= {round(d_from_camera,2)}",(200,50), fonts, 1, (WHITE), 1)
                 if(d_from_camera<0):
-                    cv2.putText(img_with_border,f"Bw={round(d_from_camera,2)}",(50,50), fonts, 1, (WHITE), 1)
+                    cv2.putText(img_with_border,f"Bw={round(d_from_camera,2)}",(400,50), fonts, 1, (WHITE), 1)
+                if(y_diff>0):
+                    cv2.putText(img_with_border, f"{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (400,50),(400,100), (255,255,255), 3, 8, 0, 0.1)
+                if(y_diff<0):
+                    cv2.putText(img_with_border, f"{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (400,100),(400,50), (255,255,255), 3, 8, 0, 0.1)
 
 
             
