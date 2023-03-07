@@ -113,7 +113,11 @@ def run(
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
     vid_path, vid_writer = [None] * bs, [None] * bs
 
-    lx_speed = 0       # variable to store ladle x for speed estimation
+    lx_speed = 0  
+    ly_speed = 0
+    lz_speed = 0
+
+    # variable to store ladle x for speed estimation
 
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
@@ -214,14 +218,16 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            h, w = 1080, 640
+            h, w = 1000, 640
             im0 = cv2.resize(im0, (h,w), interpolation = cv2.INTER_LINEAR)
             
             #Speed estimation
-            speed = (lx - lx_speed)*30
+            speed = 0
+            x_speed = (lx - lx_speed)*30*120.182/640
             lx_speed = lx
-        
-
+            y_speed = (ly - ly_speed)*30*89.655/640
+            ly_speed = ly
+            
             #Actual distance calculation
             # if(type(lw) == int & type(sw) == int):
             Actual_distance = 132.08
@@ -262,7 +268,8 @@ def run(
             #Relative position
             x_diff = ((lx - sx)*2*h_l)*6
             y_diff = ((ly - sy)*2*v_l)
-        
+            x_d = ((lx - sx)*1201.8205091737) - 8.45
+            y_d = ((ly - sy)*(896.551724+885.714285)/2)
             
             #position indicators
             cv2.circle(im0,(int(h_l+x_diff-70),v_l*2),10,(255,255,255),-3)
@@ -294,25 +301,32 @@ def run(
             img_with_border = cv2.copyMakeBorder(im0, y, y, x, x, cv2.BORDER_CONSTANT, value=[0, 0, 0])
 
             if(lw !=0):
-                d_from_camera = focal_length*actual_width/(lw*h) - 130
+                d_from_camera = focal_length*actual_width/(lw*h) - 130 - 6.63
+
+                z_speed = d_from_camera - lz_speed
+                lz_speed = d_from_camera
+                speed = numpy.sqrt(x_speed*x_speed + y_speed*y_speed + z_speed*z_speed)*0.01
                 #cv2.putText(img_with_border, f"D_from_c = {round(d_from_camera,2)}", (450, 150), fonts, 1, (WHITE), 1)
                 cv2.circle(im0,(h_l*2,v_l+int(d_from_camera)),30,(255,255,255),-3)
-                if(x_diff>0):
-                    cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
-                    cv2.arrowedLine(img_with_border, (150,150),(200,150), (255,255,255), 3, 8, 0, 0.1)
-                if(x_diff<0):
-                    cv2.putText(img_with_border, f"{round(x_diff,3)}", (50, 150), fonts, 1, (WHITE), 1)
-                    cv2.arrowedLine(img_with_border, (300,150),(100,150), (255,255,255), 3, 8, 0, 0.1)
+                cv2.putText(img_with_border,"CRANE OPERATOR INTERFACE",(230,100),fonts,3,(WHITE),1)
+                if(x_d>0):
+                    cv2.putText(img_with_border, f"{abs(round(x_d-9.39+11.27+0.94-1.88,2))} mm", (10, 300), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (150,290),(200,290), (255,255,255), 3, 8, 0, 0.1)
+                if(x_d<0):
+                    cv2.putText(img_with_border, f"{abs(round(x_d-9.39+11.27+0.94-1.88,2))} mm", (10, 300), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (200,290),(150,290), (255,255,255), 3, 8, 0, 0.1)
+                if(y_d>0):
+                    cv2.putText(img_with_border, f"{abs(round(y_d + 214.75 - 108-4-4+8))} mm", (10, 400), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (175,375),(175,425), (255,255,255), 3, 8, 0, 0.1)
+                if(y_d<0):
+                    cv2.putText(img_with_border, f"{abs(round(y_d + 214.75 - 108-4-4+8))} mm", (10, 400), fonts, 1, (WHITE), 1)
+                    cv2.arrowedLine(img_with_border, (175,425),(175,375), (255,255,255), 3, 8, 0, 0.1)
                 if(d_from_camera>0):
-                    cv2.putText(img_with_border, f"Fw= {round(d_from_camera,2)}",(200,50), fonts, 1, (WHITE), 1)
+                    cv2.putText(img_with_border, f"{abs(round(d_from_camera-3.21-1.62+3.24+1.62-3.24,2))} cm",(10,500), fonts, 1, (WHITE), 1)
+                    cv2.putText(img_with_border,"Forward",(130,500),fonts,1,(WHITE),1)
                 if(d_from_camera<0):
-                    cv2.putText(img_with_border,f"Bw={round(d_from_camera,2)}",(400,50), fonts, 1, (WHITE), 1)
-                if(y_diff>0):
-                    cv2.putText(img_with_border, f"{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1)
-                    cv2.arrowedLine(img_with_border, (400,50),(400,100), (255,255,255), 3, 8, 0, 0.1)
-                if(y_diff<0):
-                    cv2.putText(img_with_border, f"{round(y_diff,3)}", (50, 200), fonts, 1, (WHITE), 1)
-                    cv2.arrowedLine(img_with_border, (400,100),(400,50), (255,255,255), 3, 8, 0, 0.1)
+                    cv2.putText(img_with_border,f"{abs(round(d_from_camera-3.21-1.62+3.24+1.62-3.24,2))} cm",(10,500), fonts, 1, (WHITE), 1)
+                    cv2.putText(img_with_border,"Backward",(130,500),fonts,1,(WHITE),1)
 
 
             
@@ -321,32 +335,36 @@ def run(
             # cv2.putText(img_with_border, f"X_diff, Y_diff = {round(x_diff,3)},{round(y_diff,3)}", (50, 150), fonts, 1, (WHITE), 1) #Offest from ideal position (x_off,y_off)
             
             # #Adding coordinates to the image
-            if(lx != None):
+            if(lw != 0):
                 # cv2.putText(img_with_border, f"Ladle centre = {round(lx,2)},{round(ly,2)}", (50, 50), fonts, 1, (WHITE), 2) #writing Ladle x,y
                 #cv2.putText(img_with_border, f"Sadle centre = {round(sx,2)},{round(sy,2)}", (50, 100), fonts, 1, (WHITE), 1) #writing Sadle x,y
                 #cv2.putText(img_with_border, f"Ladle height = {round(lh,2)}", (400, 50), fonts, 1, (WHITE), 1) #writing Ladle height
                 #cv2.putText(img_with_border, f"Sadle height = {round(sh,2)}", (400, 100), fonts, 1, (WHITE), 1) #writing Sadle height
                 #cv2.putText(img_with_border, f"Ladle width = {round(lw,2)}", (700, 50), fonts, 1, (WHITE), 1) #writing Ladle width
                 #cv2.putText(img_with_border, f"Sadle width = {round(lh,2)}", (700, 100), fonts, 1, (WHITE), 1) #writing Sadle width
-                cv2.putText(img_with_border, f"Ladle speed = {round(speed,2)}",(50,50), fonts, 1, (WHITE), 1) #writing speed estimation
+                cv2.putText(img_with_border, f"Speed = {round(speed,2)}",(10,200), fonts, 1, (WHITE), 1) #writing speed estimation
                 # Find focal length: (width in pixel*actual distance)/actual width; keeps constant
                 # Focal length* Actual width (constant scaling factor) = width in pixels/actual distance
                 # Actual width = (width in pixels/actual distance)/focal length
             
             #Crane Running Status
-            if speed >=0.02:
-                cv2.putText(img_with_border,' Moving',(1300,550),fonts, 1, WHITE, 1)
-                cv2.circle(img_with_border, (1300,545),10,(0,0,255),-3)
+            if speed >0.02:
+                cv2.putText(img_with_border,'  Moving',(1320,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (1320,545),10,(0,0,255),-3)
             else:
-                cv2.putText(img_with_border,' Stationary',(1300,550),fonts, 1, WHITE, 1)
-                cv2.circle(img_with_border, (1300,545),10,(0,255,0),-3)
+                cv2.putText(img_with_border,'  Stationary',(1320,550),fonts, 1, WHITE, 1)
+                cv2.circle(img_with_border, (1320,545),10,(0,255,0),-3)
+
+            #Tilting detection
+            if lw>0.145:
+                cv2.putText(img_with_border,'Tilt detected!!',(1320,600), fonts, 1, WHITE, 1)
 
             #Logo Addition:
-            logo = cv2.imread('images.png')
+            #logo = cv2.imread('images.png')
             x_off = 1400
             y_off = 0
-            logo_resize = cv2.resize(logo, (100,100))
-            img_with_border[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
+            #logo_resize = cv2.resize(logo, (100,100))
+            #img_with_border[y_off:y_off+logo_resize.shape[0],x_off:x_off+logo_resize.shape[1]] = logo_resize
 
             #
             if view_img:
@@ -373,7 +391,7 @@ def run(
                         else:  # stream
                             fps, w, h = 30, im0.shape[1], im0.shape[0]
                         save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
-                        vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                        vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (1000, 15000))
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
@@ -412,7 +430,7 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
+    parser.add_argument('--line-thickness', default=1, type=int, help='bounding box thickness (pixels)')
     parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
     parser.add_argument('--hide-conf', default=True, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
